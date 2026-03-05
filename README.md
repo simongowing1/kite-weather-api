@@ -3,6 +3,7 @@
 Is it kite weather at your location today?
 
 Base URL: `https://kite-weather-api.up.railway.app`.
+
 Interactive docs: `https://kite-weather-api.up.railway.app/docs`
 
 ## Local Setup
