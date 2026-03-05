@@ -1,6 +1,8 @@
 # Kite Weather API
 
-Is it kite weather at your location today?
+Is it kite weather today?
+
+Our neighbour gave my kids an old kite. But how do I know the best day to fly it with them? 
 
 Base URL: `https://kite-weather-api.up.railway.app`.
 
