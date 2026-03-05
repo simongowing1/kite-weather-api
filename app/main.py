@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel
 
-from conditions import CONDITIONS, KiteConditions, assess
-from weather import fetch_max_wind_speed
+from app.conditions import CONDITIONS, assess
+from app.weather import fetch_max_wind_speed
 
 app = FastAPI(
     title="Kite Weather API",
@@ -11,12 +11,22 @@ app = FastAPI(
 )
 
 
+class ConditionsModel(BaseModel):
+    min_wind_kmh: float
+    max_wind_kmh: float
+
+
+class LocationModel(BaseModel):
+    lat: float
+    lon: float
+
+
 class KiteWeatherResponse(BaseModel):
     is_kite_weather: bool
     verdict: str
     wind_speed_kmh: float
-    conditions: dict
-    location: dict
+    conditions: ConditionsModel
+    location: LocationModel
 
 
 @app.get("/")
@@ -47,11 +57,11 @@ async def kite_weather(
         is_kite_weather=is_kite,
         verdict=verdict,
         wind_speed_kmh=wind_speed,
-        conditions={
-            "min_wind_kmh": CONDITIONS.min_wind_kmh,
-            "max_wind_kmh": CONDITIONS.max_wind_kmh,
-        },
-        location={"lat": lat, "lon": lon},
+        conditions=ConditionsModel(
+            min_wind_kmh=CONDITIONS.min_wind_kmh,
+            max_wind_kmh=CONDITIONS.max_wind_kmh,
+        ),
+        location=LocationModel(lat=lat, lon=lon),
     )
 
 

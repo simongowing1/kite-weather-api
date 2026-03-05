@@ -4,10 +4,7 @@ OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 
 
 async def fetch_max_wind_speed(lat: float, lon: float) -> float:
-    """
-    Fetches today's maximum wind speed (km/h) at 10m for the given coordinates
-    from the Open-Meteo free API.
-    """
+    """Fetches today's maximum wind speed (km/h) at 10m for the given coordinates."""
     params = {
         "latitude": lat,
         "longitude": lon,
