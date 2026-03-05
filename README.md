@@ -66,20 +66,6 @@ Edit `conditions.py` to adjust the thresholds.
 | `lat` | float | yes | Latitude (-90 to 90) |
 | `lon` | float | yes | Longitude (-180 to 180) |
 
-## Deploy
-
-### Railway
-1. Push this repo to GitHub
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub repo
-3. Select the repo — Railway auto-detects Python and uses the `Procfile`
-4. Done. Your API URL appears in the Railway dashboard.
-
-### Render
-1. Push this repo to GitHub
-2. Go to [render.com](https://render.com) → New → Web Service → Connect repo
-3. Render picks up `render.yaml` automatically
-4. Done. Your API URL appears in the Render dashboard.
-
 ---
 
 ## Weather data
