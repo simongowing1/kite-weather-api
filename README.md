@@ -8,26 +8,10 @@ Base URL: `https://kite-weather-api.up.railway.app`.
 
 Interactive docs: `https://kite-weather-api.up.railway.app/docs`
 
-## Local Setup
-
-```bash
-pip install -r requirements.txt
-```
-
-## Run
-
-```bash
-uvicorn main:app --reload
-```
-
-The API is now running at `http://localhost:8000`.
-
-Interactive docs: `http://localhost:8000/docs`
-
 ## Usage
 
 ```bash
-curl "http://localhost:8000/kite-weather?lat=53.3498&lon=-6.2603"
+curl "https://kite-weather-api.up.railway.app/kite-weather?lat=53.3498&lon=-6.2603"
 ```
 
 ```json
@@ -67,6 +51,22 @@ Edit `conditions.py` to adjust the thresholds.
 |---|---|---|---|
 | `lat` | float | yes | Latitude (-90 to 90) |
 | `lon` | float | yes | Longitude (-180 to 180) |
+
+## Local Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+## Run
+
+```bash
+uvicorn main:app --reload
+```
+
+The API is now running at `http://localhost:8000`.
+
+Interactive docs: `http://localhost:8000/docs`
 
 ---
 
