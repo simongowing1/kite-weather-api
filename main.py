@@ -19,6 +19,18 @@ class KiteWeatherResponse(BaseModel):
     location: dict
 
 
+@app.get("/")
+async def root():
+    return {
+        "name": "Kite Weather API",
+        "description": "Is it kite weather at your location today?",
+        "endpoints": {
+            "kite-weather": "/kite-weather",
+            "health": "/health",
+        },
+    }
+
+
 @app.get("/kite-weather", response_model=KiteWeatherResponse)
 async def kite_weather(
     lat: float = Query(..., description="Latitude", ge=-90, le=90),
