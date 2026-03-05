@@ -7,6 +7,15 @@ from main import app
 client = TestClient(app)
 
 
+def test_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "Kite Weather API"
+    assert "kite-weather" in body["endpoints"]
+    assert "health" in body["endpoints"]
+
+
 def test_health():
     response = client.get("/health")
     assert response.status_code == 200
