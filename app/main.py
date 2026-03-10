@@ -1,8 +1,13 @@
+from pathlib import Path
+
 from fastapi import FastAPI, Query, HTTPException
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from app.conditions import CONDITIONS, assess
 from app.weather import fetch_max_wind_speed
+
+_VIEWER_HTML = (Path(__file__).parent / "viewer.html").read_text()
 
 app = FastAPI(
     title="Kite Weather API",
@@ -63,6 +68,16 @@ async def kite_weather(
         ),
         location=LocationModel(lat=lat, lon=lon),
     )
+
+
+@app.get("/viewer", response_class=HTMLResponse)
+async def viewer():
+    return HTMLResponse(content=_VIEWER_HTML)
+
+
+@app.get("/kite-weather/here", response_class=HTMLResponse)
+async def kite_weather_here():
+    return RedirectResponse(url="/viewer?here=1")
 
 
 @app.get("/health")
