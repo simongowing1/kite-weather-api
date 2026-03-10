@@ -102,6 +102,16 @@
     button:hover { background: #3b7de8; }
     button:disabled { background: #2d3748; cursor: default; }
 
+    .btn-here {
+      background: none;
+      border: 1px solid #2d3748;
+      color: #64748b;
+      font-size: 0.85rem;
+      padding: 0.55rem 1rem;
+    }
+    .btn-here:hover { border-color: #4f8ef7; color: #e2e8f0; background: none; }
+    .btn-here:disabled { border-color: #1e2a3a; color: #334155; background: none; }
+
     .error {
       color: #f87171;
       font-size: 0.82rem;
@@ -182,6 +192,7 @@
     <input type="number" id="lat" placeholder="Latitude"  step="any" min="-90"  max="90"  required>
     <input type="number" id="lon" placeholder="Longitude" step="any" min="-180" max="180" required>
     <button type="submit" id="btn">Check</button>
+    <button type="button" id="btn-here" class="btn-here" title="Use my location">&#9678; Here</button>
   </form>
 
   <div class="error" id="error"></div>
@@ -194,6 +205,7 @@
     const detailEl  = document.getElementById('wind-detail');
     const errorEl   = document.getElementById('error');
     const btn       = document.getElementById('btn');
+    const btnHere   = document.getElementById('btn-here');
 
     function resetNeedle() {
       needle.style.transition = 'none';
@@ -230,8 +242,7 @@
       errorEl.textContent   = '';
       verdictEl.textContent = '';
       detailEl.textContent  = '';
-      btn.disabled = true;
-
+      setAllDisabled(true);
       resetNeedle();
 
       try {
@@ -244,21 +255,61 @@
       } catch (e) {
         errorEl.textContent = e.message;
       } finally {
-        btn.disabled = false;
+        setAllDisabled(false);
       }
+    }
+
+    function setAllDisabled(disabled) {
+      btn.disabled     = disabled;
+      btnHere.disabled = disabled;
+    }
+
+    async function checkWithCoords(lat, lon) {
+      const p = new URLSearchParams(window.location.search);
+      p.set('lat', lat); p.set('lon', lon); p.delete('here');
+      history.pushState({}, '', `?${p}`);
+      document.getElementById('lat').value = lat;
+      document.getElementById('lon').value = lon;
+      await check(lat, lon);
+    }
+
+    function useHere() {
+      if (!navigator.geolocation) {
+        errorEl.textContent = 'Geolocation is not supported by this browser.';
+        return;
+      }
+      errorEl.textContent   = '';
+      verdictEl.textContent = '';
+      detailEl.textContent  = 'Getting your location…';
+      setAllDisabled(true);
+
+      navigator.geolocation.getCurrentPosition(
+        async ({ coords }) => {
+          detailEl.textContent = '';
+          await checkWithCoords(
+            parseFloat(coords.latitude.toFixed(5)),
+            parseFloat(coords.longitude.toFixed(5))
+          );
+        },
+        (err) => {
+          detailEl.textContent  = '';
+          errorEl.textContent   = `Location error: ${err.message}`;
+          setAllDisabled(false);
+        },
+        { timeout: 10000 }
+      );
     }
 
     document.getElementById('form').addEventListener('submit', async e => {
       e.preventDefault();
       const lat = document.getElementById('lat').value;
       const lon = document.getElementById('lon').value;
-      const p = new URLSearchParams(window.location.search);
-      p.set('lat', lat); p.set('lon', lon);
-      history.pushState({}, '', `?${p}`);
-      await check(lat, lon);
+      await checkWithCoords(lat, lon);
     });
 
-    // Auto-run if lat/lon already in URL
+    btnHere.addEventListener('click', useHere);
+
+    // Auto-run from URL params
     const p   = new URLSearchParams(window.location.search);
     const lat = p.get('lat');
     const lon = p.get('lon');
@@ -266,6 +317,8 @@
       document.getElementById('lat').value = lat;
       document.getElementById('lon').value = lon;
       check(lat, lon);
+    } else if (p.has('here')) {
+      useHere();
     }
   </script>
 
