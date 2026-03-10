@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kite Weather</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0d1117;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      text-transform: uppercase;
+    }
+
+    /* ── Gauge ── */
+    .gauge-wrap {
+      position: relative;
+      width: 320px;
+      height: 210px;
+    }
+
+    .gauge-wrap svg {
+      overflow: visible;
+    }
+
+    /* Needle rotates around the pivot (160, 185) in SVG user units */
+    #needle {
+      transform-box: view-box;
+      transform-origin: 160px 185px;
+      transform: rotate(0deg);
+      transition: transform 1.4s cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+
+    /* ── Verdict ── */
+    .verdict {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-height: 2rem;
+      text-align: center;
+      letter-spacing: 0.02em;
+      transition: color 0.4s ease;
+    }
+
+    .wind-detail {
+      font-size: 0.85rem;
+      color: #475569;
+      text-align: center;
+      min-height: 1.2rem;
+    }
+
+    /* ── Form ── */
+    form {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    input[type="number"] {
+      background: #161b27;
+      border: 1px solid #2d3748;
+      color: #e2e8f0;
+      padding: 0.55rem 0.8rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      width: 130px;
+      outline: none;
+      -moz-appearance: textfield;
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    input[type="number"]:focus { border-color: #4f8ef7; }
+    input[type="number"]::placeholder { color: #334155; }
+
+    button {
+      background: #4f8ef7;
+      color: #fff;
+      border: none;
+      padding: 0.55rem 1.4rem;
+      border-radius: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover { background: #3b7de8; }
+    button:disabled { background: #2d3748; cursor: default; }
+
+    .error {
+      color: #f87171;
+      font-size: 0.82rem;
+      min-height: 1.1rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Kite Weather</h1>
+
+  <div class="gauge-wrap">
+    <svg viewBox="0 0 320 210" width="320" height="210">
+      <defs>
+        <!-- Red glow for "no kite" side -->
+        <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <!-- Green glow for "kite weather" side -->
+        <filter id="glow-green" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!--
+        Centre: (160, 185)  Radius: 125
+        9:00  → (160-125, 185) = (35, 185)
+        12:00 → (160, 185-125) = (160, 60)
+        3:00  → (160+125, 185) = (285, 185)
+
+        Arc 9→12 (clockwise): M 35 185 A 125 125 0 0 1 160 60
+        Arc 12→3 (clockwise): M 160 60 A 125 125 0 0 1 285 185
+      -->
+
+      <!-- Dim track (full arc) -->
+      <path d="M 35 185 A 125 125 0 0 1 160 60 A 125 125 0 0 1 285 185"
+            fill="none" stroke="#1e2a3a" stroke-width="20" stroke-linecap="round"/>
+
+      <!-- Red zone: 9:00 → 12:00 -->
+      <path id="arc-red"
+            d="M 35 185 A 125 125 0 0 1 160 60"
+            fill="none" stroke="#ef4444" stroke-width="20" stroke-linecap="round"
+            opacity="0.25"/>
+
+      <!-- Green zone: 12:00 → 3:00 -->
+      <path id="arc-green"
+            d="M 160 60 A 125 125 0 0 1 285 185"
+            fill="none" stroke="#22c55e" stroke-width="20" stroke-linecap="round"
+            opacity="0.25"/>
+
+      <!-- 12:00 centre tick -->
+      <line x1="160" y1="58" x2="160" y2="74"
+            stroke="#334155" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- Needle -->
+      <g id="needle">
+        <!-- Shadow -->
+        <line x1="160" y1="185" x2="160" y2="75"
+              stroke="#000" stroke-width="5" stroke-linecap="round" opacity="0.3"/>
+        <!-- Shaft -->
+        <line x1="160" y1="185" x2="160" y2="75"
+              stroke="#e2e8f0" stroke-width="3" stroke-linecap="round"/>
+        <!-- Pivot outer -->
+        <circle cx="160" cy="185" r="9" fill="#1e2a3a" stroke="#e2e8f0" stroke-width="2"/>
+        <!-- Pivot inner -->
+        <circle cx="160" cy="185" r="4" fill="#e2e8f0"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="verdict" id="verdict"></div>
+  <div class="wind-detail" id="wind-detail"></div>
+
+  <form id="form">
+    <input type="number" id="lat" placeholder="Latitude"  step="any" min="-90"  max="90"  required>
+    <input type="number" id="lon" placeholder="Longitude" step="any" min="-180" max="180" required>
+    <button type="submit" id="btn">Check</button>
+  </form>
+
+  <div class="error" id="error"></div>
+
+  <script>
+    const needle    = document.getElementById('needle');
+    const arcRed    = document.getElementById('arc-red');
+    const arcGreen  = document.getElementById('arc-green');
+    const verdictEl = document.getElementById('verdict');
+    const detailEl  = document.getElementById('wind-detail');
+    const errorEl   = document.getElementById('error');
+    const btn       = document.getElementById('btn');
+
+    function resetNeedle() {
+      needle.style.transition = 'none';
+      needle.style.transform  = 'rotate(0deg)';
+      arcRed.style.opacity    = '0.25';
+      arcGreen.style.opacity  = '0.25';
+      arcRed.removeAttribute('filter');
+      arcGreen.removeAttribute('filter');
+    }
+
+    function applyResult(data) {
+      // Small pause so the reset registers before the transition fires
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        needle.style.transition = 'transform 1.4s cubic-bezier(0.34, 1.4, 0.64, 1)';
+        needle.style.transform  = data.is_kite_weather ? 'rotate(90deg)' : 'rotate(-90deg)';
+
+        if (data.is_kite_weather) {
+          arcGreen.style.opacity = '0.9';
+          arcGreen.setAttribute('filter', 'url(#glow-green)');
+          verdictEl.style.color  = '#22c55e';
+        } else {
+          arcRed.style.opacity = '0.9';
+          arcRed.setAttribute('filter', 'url(#glow-red)');
+          verdictEl.style.color = '#ef4444';
+        }
+
+        verdictEl.textContent = data.verdict;
+        detailEl.textContent  =
+          `Wind: ${data.wind_speed_kmh} km/h · Kite range: ${data.conditions.min_wind_kmh}–${data.conditions.max_wind_kmh} km/h`;
+      }));
+    }
+
+    async function check(lat, lon) {
+      errorEl.textContent   = '';
+      verdictEl.textContent = '';
+      detailEl.textContent  = '';
+      btn.disabled = true;
+
+      resetNeedle();
+
+      try {
+        const res = await fetch(`/kite-weather?lat=${lat}&lon=${lon}`);
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.detail || `Error ${res.status}`);
+        }
+        applyResult(await res.json());
+      } catch (e) {
+        errorEl.textContent = e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    document.getElementById('form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const lat = document.getElementById('lat').value;
+      const lon = document.getElementById('lon').value;
+      const p = new URLSearchParams(window.location.search);
+      p.set('lat', lat); p.set('lon', lon);
+      history.pushState({}, '', `?${p}`);
+      await check(lat, lon);
+    });
+
+    // Auto-run if lat/lon already in URL
+    const p   = new URLSearchParams(window.location.search);
+    const lat = p.get('lat');
+    const lon = p.get('lon');
+    if (lat && lon) {
+      document.getElementById('lat').value = lat;
+      document.getElementById('lon').value = lon;
+      check(lat, lon);
+    }
+  </script>
+
+</body>
+</html>
