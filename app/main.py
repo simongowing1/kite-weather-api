@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from fastapi import FastAPI, Query, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from app.conditions import CONDITIONS, assess
@@ -73,6 +73,11 @@ async def kite_weather(
 @app.get("/viewer", response_class=HTMLResponse)
 async def viewer():
     return HTMLResponse(content=_VIEWER_HTML)
+
+
+@app.get("/kite-weather/here", response_class=HTMLResponse)
+async def kite_weather_here():
+    return RedirectResponse(url="/viewer?here=1")
 
 
 @app.get("/health")
