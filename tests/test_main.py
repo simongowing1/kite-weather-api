@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import patch, AsyncMock
 from fastapi.testclient import TestClient
 
-from app.main import app
+from api.main import app
 
 client = TestClient(app)
 
@@ -23,7 +23,7 @@ def test_health():
 
 
 def test_kite_weather_good_conditions():
-    with patch("app.main.fetch_max_wind_speed", new=AsyncMock(return_value=28.0)):
+    with patch("api.main.fetch_max_wind_speed", new=AsyncMock(return_value=28.0)):
         response = client.get("/kite-weather?lat=53.35&lon=-6.26")
 
     assert response.status_code == 200
@@ -35,7 +35,7 @@ def test_kite_weather_good_conditions():
 
 
 def test_kite_weather_too_calm():
-    with patch("app.main.fetch_max_wind_speed", new=AsyncMock(return_value=5.0)):
+    with patch("api.main.fetch_max_wind_speed", new=AsyncMock(return_value=5.0)):
         response = client.get("/kite-weather?lat=53.35&lon=-6.26")
 
     assert response.status_code == 200
@@ -45,7 +45,7 @@ def test_kite_weather_too_calm():
 
 
 def test_kite_weather_too_strong():
-    with patch("app.main.fetch_max_wind_speed", new=AsyncMock(return_value=80.0)):
+    with patch("api.main.fetch_max_wind_speed", new=AsyncMock(return_value=80.0)):
         response = client.get("/kite-weather?lat=53.35&lon=-6.26")
 
     assert response.status_code == 200
@@ -70,7 +70,7 @@ def test_invalid_lon():
 
 
 def test_weather_fetch_failure_returns_502():
-    with patch("app.main.fetch_max_wind_speed", new=AsyncMock(side_effect=Exception("API down"))):
+    with patch("api.main.fetch_max_wind_speed", new=AsyncMock(side_effect=Exception("API down"))):
         response = client.get("/kite-weather?lat=53.35&lon=-6.26")
 
     assert response.status_code == 502

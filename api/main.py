@@ -1,11 +1,12 @@
 from pathlib import Path
 
 from fastapi import FastAPI, Query, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
-from app.conditions import CONDITIONS, assess
-from app.weather import fetch_max_wind_speed
+from api.conditions import CONDITIONS, assess
+from api.weather import fetch_max_wind_speed
 
 _VIEWER_HTML = (Path(__file__).parent / "viewer.html").read_text()
 
@@ -13,6 +14,13 @@ app = FastAPI(
     title="Kite Weather API",
     description="Is it kite weather at your location today?",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["GET"],
+    allow_headers=["*"],
 )
 
 
