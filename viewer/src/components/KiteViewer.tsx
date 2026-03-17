@@ -110,11 +110,11 @@ export default function KiteViewer() {
     check(la, lo);
   }
 
-  const arcRedOpacity   = result && !result.is_kite_weather ? 0.9 : 0.25;
+  const arcRedOpacity = result && !result.is_kite_weather ? 0.9 : 0.25;
   const arcGreenOpacity = result?.is_kite_weather ? 0.9 : 0.25;
-  const arcRedFilter    = result && !result.is_kite_weather ? 'url(#glow-red)' : undefined;
-  const arcGreenFilter  = result?.is_kite_weather ? 'url(#glow-green)' : undefined;
-  const verdictColor    = result ? (result.is_kite_weather ? '#22c55e' : '#ef4444') : 'transparent';
+  const arcRedFilter = result && !result.is_kite_weather ? 'url(#glow-red)' : undefined;
+  const arcGreenFilter = result?.is_kite_weather ? 'url(#glow-green)' : undefined;
+  const verdictColor = result ? (result.is_kite_weather ? '#22c55e' : '#ef4444') : 'transparent';
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center gap-8 p-8">
@@ -157,12 +157,6 @@ export default function KiteViewer() {
 
           {/* 12:00 tick */}
           <line x1="160" y1="58" x2="160" y2="74" stroke="#334155" strokeWidth="2" strokeLinecap="round" />
-
-          {/* Labels */}
-          <text x="22"  y="198" fill="#64748b" fontSize="11" textAnchor="middle" fontFamily="system-ui">No</text>
-          <text x="22"  y="210" fill="#64748b" fontSize="11" textAnchor="middle" fontFamily="system-ui">kite</text>
-          <text x="298" y="198" fill="#64748b" fontSize="11" textAnchor="middle" fontFamily="system-ui">Kite</text>
-          <text x="298" y="210" fill="#64748b" fontSize="11" textAnchor="middle" fontFamily="system-ui">day!</text>
 
           {/* Needle */}
           <g style={{
