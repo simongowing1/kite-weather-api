@@ -1,5 +1,5 @@
 import pytest
-from app.conditions import KiteConditions, assess
+from api.conditions import KiteConditions, assess
 
 
 def test_too_calm():
