@@ -36,7 +36,7 @@ curl "https://kite-weather-api.up.railway.app/kite-weather?lat=53.3498&lon=-6.26
 |---|---|---|
 | Wind speed (km/h) | 15 | 50 |
 
-Edit `app/conditions.py` to adjust the thresholds.
+Edit `api/conditions.py` to adjust the thresholds.
 
 ## Endpoints
 
@@ -61,7 +61,7 @@ pip install -r requirements.txt
 ## Run
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn api.main:app --reload
 ```
 
 The API is now running at `http://localhost:8000`.
