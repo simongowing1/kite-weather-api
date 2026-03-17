@@ -20,3 +20,6 @@ env/
 # env files
 .env
 claude.md
+
+viewer/node_modules/
+viewer/.next/
